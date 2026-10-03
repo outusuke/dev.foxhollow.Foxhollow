@@ -34,9 +34,17 @@ modules:
         #!/bin/sh
         export TMPDIR="$XDG_RUNTIME_DIR/app/$FLATPAK_ID"
         mkdir -p "$TMPDIR"
+        # Electron can pick Wayland even when no compositor socket is available
+        if [ -z "$WAYLAND_DISPLAY" ]; then
+          set -- --ozone-platform=x11 "$@"
+        fi
         exec zypak-wrapper /app/foxhollow/foxhollow-launcher "$@"
         WRAP
       - install -Dm755 foxhollow-launcher /app/bin/foxhollow-launcher
+      # The game's OpenGL ES fallback dlopen()s the unversioned names
+      - mkdir -p /app/lib
+      - ln -sf /usr/lib/x86_64-linux-gnu/libEGL.so.1 /app/lib/libEGL.so
+      - ln -sf /usr/lib/x86_64-linux-gnu/libGLESv2.so.2 /app/lib/libGLESv2.so
     sources:
       - type: file
         path: Foxhollow-amd64.deb
