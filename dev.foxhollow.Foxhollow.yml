@@ -27,7 +27,7 @@ modules:
       - mkdir deb-root && tar -xf data.tar.* -C deb-root
       - cp -a deb-root/opt/Foxhollow /app/foxhollow
       - rm -f /app/foxhollow/chrome-sandbox        # zypak replaces the suid sandbox
-      - install -Dm644 deb-root/usr/share/icons/hicolor/1024x1024/apps/foxhollow-launcher.png /app/share/icons/hicolor/1024x1024/apps/dev.foxhollow.Foxhollow.png
+      - install -Dm644 foxhollow-512.png /app/share/icons/hicolor/512x512/apps/dev.foxhollow.Foxhollow.png
       - install -Dm644 deb-root/usr/share/applications/foxhollow-launcher.desktop /app/share/applications/dev.foxhollow.Foxhollow.desktop
       - sed -i -E 's|^Exec=.*|Exec=foxhollow-launcher %U|; s|^Icon=.*|Icon=dev.foxhollow.Foxhollow|' /app/share/applications/dev.foxhollow.Foxhollow.desktop
       - |
@@ -41,3 +41,5 @@ modules:
     sources:
       - type: file
         path: Foxhollow-amd64.deb
+      - type: file
+        path: foxhollow-512.png
