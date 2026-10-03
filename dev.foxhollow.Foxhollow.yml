@@ -1,0 +1,43 @@
+app-id: dev.foxhollow.Foxhollow
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+base: org.electronjs.Electron2.BaseApp
+base-version: '25.08'
+command: foxhollow-launcher
+separate-locales: false
+
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --device=all                                  # GPU (Vulkan) + gamepads
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.kde.StatusNotifierWatcher     # tray icon
+  - --filesystem=xdg-download:ro                  # where your disc dump lives
+  - --filesystem=xdg-documents:ro
+
+modules:
+  - name: foxhollow
+    buildsystem: simple
+    build-commands:
+      - ar x Foxhollow-amd64.deb
+      - mkdir deb-root && tar -xf data.tar.* -C deb-root
+      - cp -a deb-root/opt/Foxhollow /app/foxhollow
+      - rm -f /app/foxhollow/chrome-sandbox        # zypak replaces the suid sandbox
+      - install -Dm644 deb-root/usr/share/icons/hicolor/1024x1024/apps/foxhollow-launcher.png /app/share/icons/hicolor/1024x1024/apps/dev.foxhollow.Foxhollow.png
+      - install -Dm644 deb-root/usr/share/applications/foxhollow-launcher.desktop /app/share/applications/dev.foxhollow.Foxhollow.desktop
+      - sed -i -E 's|^Exec=.*|Exec=foxhollow-launcher %U|; s|^Icon=.*|Icon=dev.foxhollow.Foxhollow|' /app/share/applications/dev.foxhollow.Foxhollow.desktop
+      - |
+        cat > foxhollow-launcher <<'WRAP'
+        #!/bin/sh
+        export TMPDIR="$XDG_RUNTIME_DIR/app/$FLATPAK_ID"
+        mkdir -p "$TMPDIR"
+        exec zypak-wrapper /app/foxhollow/foxhollow-launcher "$@"
+        WRAP
+      - install -Dm755 foxhollow-launcher /app/bin/foxhollow-launcher
+    sources:
+      - type: file
+        path: Foxhollow-amd64.deb
